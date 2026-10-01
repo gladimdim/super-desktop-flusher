@@ -20,7 +20,8 @@ from sd_plugin import Plugin, RpcError
 plugin = Plugin()
 VIEW = "flusher.panel"
 BUTTON = "flusher.button"
-AGENTS = {"claude": "Claude Code", "codex": "Codex", "opencode": "OpenCode", "gemini": "Gemini CLI"}
+AGENTS = {"claude": "Claude Code", "codex": "Codex", "grok": "Grok", "cursor": "Cursor Agent",
+          "opencode": "OpenCode", "gemini": "Gemini CLI", "antigravity": "Antigravity"}
 SKIP = {"node_modules", "target", "vendor", "dist", "build", "__pycache__", "venv", ".venv"}
 MAX_REPOS = 300
 MAX_DIRS = 20000

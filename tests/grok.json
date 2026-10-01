@@ -1,0 +1,59 @@
+{
+  "setup": "mkdir -p repos && cd repos && for r in app clean nested/deep/lib node_modules/dep; do mkdir -p $r && (cd $r && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main init -q && echo one > a.txt && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main add . && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main commit -qm init); done && echo two >> app/a.txt && echo new > app/b.txt && echo two >> nested/deep/lib/a.txt && echo two >> node_modules/dep/a.txt",
+  "settings": {
+    "folders": [
+      "${fixture}/repos"
+    ],
+    "agent": "grok"
+  },
+  "steps": [
+    {
+      "run": "flusher.open"
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "agent",
+        "propsContain": {
+          "text": "Agent: Grok"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "flush",
+        "props": {
+          "enabled": true
+        }
+      }
+    },
+    {
+      "click": {
+        "view": "flusher.panel",
+        "node": "flush"
+      }
+    },
+    {
+      "expect": {
+        "call": "harness.launch",
+        "count": 1,
+        "params": {
+          "agent": "grok"
+        },
+        "paramsContain": {
+          "prompt": "Flush the uncommitted work in these 2 git repositories"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "status",
+        "propsContain": {
+          "text": "Started Grok in a new card"
+        }
+      }
+    }
+  ]
+}

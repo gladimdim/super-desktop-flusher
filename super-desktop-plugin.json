@@ -3,7 +3,7 @@
   "manifestVersion": 1,
   "id": "flusher",
   "name": "Flusher",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lists the git repositories in your folders that have uncommitted changes; Flush starts an agent that commits them meaningfully and pushes each current branch.",
   "author": "gladimdim",
   "license": "MIT",
@@ -87,8 +87,11 @@
         "values": [
           "claude",
           "codex",
+          "grok",
+          "cursor",
           "opencode",
-          "gemini"
+          "gemini",
+          "antigravity"
         ],
         "default": "claude"
       },

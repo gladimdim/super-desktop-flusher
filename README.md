@@ -10,8 +10,8 @@ them to an AI agent that commits them with meaningful messages and pushes them.
   sub-folders. All of them are ticked.
 - Untick the ones that should stay as they are. **Files** shows what changed
   in a repository.
-- **Flush** starts the agent you chose (Claude Code, Codex, OpenCode or Gemini
-  CLI) in a new SUPER DESKTOP card, in the folder those repositories share,
+- **Flush** starts the agent you chose (Claude Code, Codex, Grok, Cursor Agent,
+  OpenCode, Gemini CLI or Antigravity) in a new SUPER DESKTOP card, in the folder those repositories share,
   with instructions to commit each one's changes as meaningful commits and push
   its current branch. You watch it work in that card and answer its questions.
 
@@ -36,7 +36,7 @@ Then open ⚙ Settings → Plugins → Flusher and add the folders to scan.
 | Setting | Default | |
 | --- | --- | --- |
 | Folders to scan | none | Repositories in these folders and their sub-folders are listed. Hidden folders, `node_modules`, `target`, `vendor`, `dist`, `build` and virtualenvs are skipped, and a repository's own sub-folders are not searched. |
-| Agent that flushes | Claude Code | `claude`, `codex`, `opencode` or `gemini`; it must be installed. |
+| Agent that flushes | Claude Code | `claude`, `codex`, `grok`, `cursor`, `opencode`, `gemini` or `antigravity`: the harnesses SUPER DESKTOP can start with a prompt. It must be installed. |
 | Sub-folder depth | 4 | How many levels below each folder are searched (1–8). |
 | Count new (untracked) files as changes | on | Off: only changes to tracked files count. |
 | Extra instructions for the agent | none | Added to the agent's prompt, e.g. a commit convention. |
