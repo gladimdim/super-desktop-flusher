@@ -13,7 +13,7 @@
     {
       "expect": {
         "view": "flusher.panel",
-        "node": "agent",
+        "node": "agent-title",
         "propsContain": {
           "text": "Agent: Grok"
         }

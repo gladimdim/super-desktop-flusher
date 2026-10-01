@@ -132,28 +132,47 @@ def update_badge(repos):
 
 
 # ---- the panel ----------------------------------------------------------------
+def short(path):
+    home = os.path.expanduser("~")
+    return "~" + path[len(home):] if path.startswith(home + os.sep) or path == home else path
+
+
+def clip(text, limit=22):
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
 def describe(repo):
-    where = repo["branch"] + (f" → {repo['upstream']}" if repo["upstream"] else " (no upstream yet)")
+    """Counts for the agent's prompt: "3 changed, 1 new"."""
     counts = []
     if repo["changed"]:
         counts.append(f"{repo['changed']} changed")
     if repo["new"]:
         counts.append(f"{repo['new']} new")
-    return f"{where} · {', '.join(counts) or 'no changes'}"
+    return ", ".join(counts) or "no changes"
 
 
 def row(i, repo):
     blocked = repo["blocked"]
-    return {"type": "column", "id": f"repo:{i}", "gap": 4, "children": [
-        {"type": "row", "id": f"head:{i}", "gap": 10, "children": [
+    badges = [{"type": "badge", "id": f"branch:{i}", "text": clip("⎇ " + repo["branch"])}]
+    if repo["changed"]:
+        badges.append({"type": "badge", "id": f"changed:{i}", "text": f"{repo['changed']} changed", "tone": "warning"})
+    if repo["new"]:
+        badges.append({"type": "badge", "id": f"new:{i}", "text": f"{repo['new']} new", "tone": "accent"})
+    where = short(repo["path"]) + (f"  ·  pushes to {repo['upstream']}" if repo["upstream"] else "  ·  no upstream yet")
+    group = {"type": "group", "id": f"repo:{i}", "gap": 6, "children": [
+        {"type": "row", "id": f"head:{i}", "gap": 8, "children": [
             {"type": "checkbox", "id": f"sel:{i}", "label": repo["name"], "value": not blocked, "enabled": not blocked},
-            {"type": "label", "id": f"where:{i}", "text": describe(repo), "style": "muted"},
+            {"type": "spacer", "id": f"space:{i}"},
+            *badges,
             {"type": "button", "id": f"files:{i}", "label": "Files"},
         ]},
-        {"type": "label", "id": f"path:{i}", "text": repo["path"], "style": "mono"},
+        {"type": "label", "id": f"where:{i}", "text": where, "style": "mono"},
         {"type": "label", "id": f"note:{i}", "text": f"Not flushed: {blocked}" if blocked else "", "style": "error", "visible": bool(blocked)},
         {"type": "code", "id": f"list:{i}", "text": "", "visible": False},
     ]}
+    if blocked:
+        group["tone"] = "error"
+    return group
 
 
 def flush_label():
@@ -163,29 +182,44 @@ def flush_label():
 
 def model(repos, values, roots):
     agent = AGENTS.get(values.get("agent", "claude"), values.get("agent", "claude"))
-    if not roots:
-        body = [{"type": "label", "id": "empty", "style": "muted", "wrap": True,
-                 "text": "No folders to scan yet. Add them in Settings → Plugins → Flusher, then press Refresh."}]
-    elif not repos:
-        body = [{"type": "label", "id": "empty", "style": "muted", "wrap": True,
-                 "text": "Every repository in your folders is clean."}]
-    else:
-        body = [{"type": "scroll", "id": "rows-scroll", "maxHeight": 380, "children": [
-            {"type": "list", "id": "rows", "gap": 12, "children": [row(i, r) for i, r in enumerate(repos)]}]}]
     count = len(repos)
-    return {"type": "column", "id": "root", "gap": 12, "children": [
+    if not roots:
+        summary, scope = "Flusher", "No folders to scan yet"
+    else:
+        summary = f"{count} project{'' if count == 1 else 's'} with uncommitted changes"
+        scope = "Scanning " + ", ".join(short(r) for r in roots)
+    header = {"type": "group", "id": "header", "tone": "accent", "children": [
         {"type": "row", "id": "top", "gap": 10, "children": [
-            {"type": "label", "id": "summary", "style": "title",
-             "text": f"{count} project{'' if count == 1 else 's'} with changes" if roots else "Flusher"},
-            {"type": "button", "id": "refresh", "label": "Refresh"},
+            {"type": "column", "id": "top-text", "gap": 2, "children": [
+                {"type": "label", "id": "summary", "style": "title", "text": summary},
+                {"type": "label", "id": "scope", "style": "muted", "text": scope},
+            ]},
+            {"type": "spacer", "id": "top-space"},
+            {"type": "button", "id": "refresh", "label": "Refresh", "icon": "⟳"},
         ]},
-        *body,
+    ]}
+    if not roots:
+        body = {"type": "group", "id": "empty-group", "children": [
+            {"type": "label", "id": "empty", "style": "muted", "wrap": True,
+             "text": "No folders to scan yet. Add them in Settings → Plugins → Flusher, then press Refresh."}]}
+    elif not repos:
+        body = {"type": "group", "id": "empty-group", "tone": "success", "children": [
+            {"type": "label", "id": "empty", "wrap": True, "text": "Every repository in your folders is clean."}]}
+    else:
+        body = {"type": "scroll", "id": "rows-scroll", "maxHeight": 360, "children": [
+            {"type": "list", "id": "rows", "gap": 10, "children": [row(i, r) for i, r in enumerate(repos)]}]}
+    footer = {"type": "group", "id": "footer", "children": [
         {"type": "row", "id": "bottom", "gap": 10, "children": [
-            {"type": "label", "id": "agent", "style": "muted", "text": f"Agent: {agent} · change it in Settings → Plugins → Flusher"},
+            {"type": "column", "id": "agent-text", "gap": 2, "children": [
+                {"type": "label", "id": "agent-title", "text": f"Agent: {agent}"},
+                {"type": "label", "id": "agent", "style": "muted", "wrap": True, "text": "Commits each ticked project and pushes its current branch. Change it in Settings → Plugins → Flusher."},
+            ]},
+            {"type": "spacer", "id": "bottom-space"},
             {"type": "button", "id": "flush", "label": flush_label(), "tone": "primary", "enabled": bool(state["selected"])},
         ]},
         {"type": "label", "id": "status", "text": "", "visible": False, "wrap": True},
     ]}
+    return {"type": "column", "id": "root", "gap": 12, "children": [header, body, footer]}
 
 
 def patch(*ops):
@@ -233,7 +267,7 @@ def on_view(handle, node, event, value):
 
 
 def prompt_for(repos, instructions):
-    lines = [f"- {r['path']} (branch {r['branch']}" + (f" → {r['upstream']}" if r["upstream"] else ", no upstream yet") + f"): {describe(r).split(' · ')[-1]}"
+    lines = [f"- {r['path']} (branch {r['branch']}" + (f" → {r['upstream']}" if r["upstream"] else ", no upstream yet") + f"): {describe(r)}"
              for r in repos]
     extra = f"\n\nAlso: {instructions.strip()}" if instructions and instructions.strip() else ""
     opening = ("Flush the uncommitted work in this git repository.\n\n" if len(repos) == 1 else
@@ -269,12 +303,14 @@ def flush():
     except RpcError as error:
         hint = error.data.get("hint") or error.message
         patch(set_props("status", text=f"Could not start {AGENTS.get(agent, agent)}: {hint}", style="error", visible=True),
+              set_props("footer", tone="error"),
               set_props("flush", enabled=True))
         return
     names = ", ".join(r["name"] for r in chosen)
-    patch(set_props("status", text=f"Started {AGENTS.get(agent, agent)} in a new card for {names}. "
+    patch(set_props("status", text=f"✓ Started {AGENTS.get(agent, agent)} in a new card for {names}. "
                                    "Watch it there and answer its questions; press Refresh when it is done.",
-                    style="success", visible=True))
+                    style="success", visible=True),
+          set_props("footer", tone="success"))
 
 
 @plugin.on("view.closed")

@@ -23,6 +23,15 @@
     {
       "expect": {
         "view": "flusher.panel",
+        "node": "repo:0",
+        "props": {
+          "tone": "error"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
         "node": "note:0",
         "props": {
           "visible": true

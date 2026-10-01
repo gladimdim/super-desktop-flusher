@@ -16,7 +16,7 @@
         "view": "flusher.panel",
         "node": "summary",
         "props": {
-          "text": "2 projects with changes"
+          "text": "2 projects with uncommitted changes"
         }
       }
     },
@@ -44,8 +44,46 @@
       "expect": {
         "view": "flusher.panel",
         "node": "where:0",
+        "propsContain": {
+          "text": "/repos/app  \u00b7  no upstream yet"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "branch:0",
         "props": {
-          "text": "main (no upstream yet) \u00b7 1 changed, 1 new"
+          "text": "\u2387 main"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "changed:0",
+        "props": {
+          "text": "1 changed",
+          "tone": "warning"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "new:0",
+        "props": {
+          "text": "1 new",
+          "tone": "accent"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "repo:0",
+        "props": {
+          "type": "group"
         }
       }
     },
@@ -167,6 +205,15 @@
         },
         "propsContain": {
           "text": "Started Codex in a new card for app."
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "footer",
+        "props": {
+          "tone": "success"
         }
       }
     }
