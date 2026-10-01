@@ -1,0 +1,81 @@
+{
+  "setup": "mkdir -p repos && cd repos && for r in app clean nested/deep/lib node_modules/dep; do mkdir -p $r && (cd $r && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main init -q && echo one > a.txt && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main add . && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main commit -qm init); done && echo two >> app/a.txt && echo new > app/b.txt && echo two >> nested/deep/lib/a.txt && echo two >> node_modules/dep/a.txt",
+  "settings": {
+    "folders": [
+      "${fixture}/repos"
+    ]
+  },
+  "steps": [
+    {
+      "run": "flusher.open"
+    },
+    {
+      "change": {
+        "view": "flusher.panel",
+        "node": "sel:0",
+        "value": false
+      }
+    },
+    {
+      "change": {
+        "view": "flusher.panel",
+        "node": "sel:1",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "flush",
+        "props": {
+          "enabled": false,
+          "label": "Flush 0 projects"
+        }
+      }
+    },
+    {
+      "change": {
+        "view": "flusher.panel",
+        "node": "sel:1",
+        "value": true
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "flush",
+        "props": {
+          "enabled": true,
+          "label": "Flush 1 project"
+        }
+      }
+    },
+    {
+      "click": {
+        "view": "flusher.panel",
+        "node": "flush"
+      }
+    },
+    {
+      "expect": {
+        "call": "harness.launch",
+        "count": 1,
+        "params": {
+          "agent": "claude"
+        },
+        "paramsContain": {
+          "folder": "/repos/nested/deep/lib"
+        }
+      }
+    },
+    {
+      "expect": {
+        "call": "harness.launch",
+        "count": 0,
+        "paramsContain": {
+          "prompt": "/repos/app "
+        }
+      }
+    }
+  ]
+}

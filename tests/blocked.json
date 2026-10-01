@@ -1,0 +1,51 @@
+{
+  "setup": "mkdir -p repos/busy && cd repos/busy && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main init -q && echo one > a.txt && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main add . && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main commit -qm init && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main checkout -qb other && echo theirs > a.txt && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main commit -qam other && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main checkout -q main && echo ours > a.txt && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main commit -qam ours && (git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main merge -q other >/dev/null 2>&1 || true)",
+  "settings": {
+    "folders": [
+      "${fixture}/repos"
+    ]
+  },
+  "steps": [
+    {
+      "run": "flusher.open"
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "sel:0",
+        "props": {
+          "label": "busy",
+          "value": false,
+          "enabled": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "note:0",
+        "props": {
+          "visible": true
+        },
+        "propsContain": {
+          "text": "conflicted"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "flush",
+        "props": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "expect": {
+        "contrib": "flusher.button",
+        "badge": null
+      }
+    }
+  ]
+}

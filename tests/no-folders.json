@@ -1,0 +1,25 @@
+{
+  "steps": [
+    {
+      "run": "flusher.open"
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "empty",
+        "propsContain": {
+          "text": "No folders to scan yet"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "flush",
+        "props": {
+          "enabled": false
+        }
+      }
+    }
+  ]
+}

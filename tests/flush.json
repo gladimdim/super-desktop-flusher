@@ -1,0 +1,174 @@
+{
+  "setup": "mkdir -p repos && cd repos && for r in app clean nested/deep/lib node_modules/dep; do mkdir -p $r && (cd $r && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main init -q && echo one > a.txt && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main add . && git -c user.name=t -c user.email=t@example.com -c init.defaultBranch=main commit -qm init); done && echo two >> app/a.txt && echo new > app/b.txt && echo two >> nested/deep/lib/a.txt && echo two >> node_modules/dep/a.txt",
+  "settings": {
+    "folders": [
+      "${fixture}/repos"
+    ],
+    "agent": "codex",
+    "instructions": "Use conventional commits."
+  },
+  "steps": [
+    {
+      "run": "flusher.open"
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "summary",
+        "props": {
+          "text": "2 projects with changes"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "sel:0",
+        "props": {
+          "label": "app",
+          "value": true
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "sel:1",
+        "props": {
+          "label": "lib",
+          "value": true
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "where:0",
+        "props": {
+          "text": "main (no upstream yet) \u00b7 1 changed, 1 new"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "flush",
+        "props": {
+          "label": "Flush 2 projects",
+          "enabled": true
+        }
+      }
+    },
+    {
+      "expect": {
+        "contrib": "flusher.button",
+        "badge": "2"
+      }
+    },
+    {
+      "click": {
+        "view": "flusher.panel",
+        "node": "files:0"
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "list:0",
+        "props": {
+          "visible": true
+        },
+        "propsContain": {
+          "text": "a.txt"
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "list:0",
+        "propsContain": {
+          "text": "?? b.txt"
+        }
+      }
+    },
+    {
+      "click": {
+        "view": "flusher.panel",
+        "node": "files:0"
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "list:0",
+        "props": {
+          "visible": false
+        }
+      }
+    },
+    {
+      "change": {
+        "view": "flusher.panel",
+        "node": "sel:1",
+        "value": false
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "flush",
+        "props": {
+          "label": "Flush 1 project"
+        }
+      }
+    },
+    {
+      "click": {
+        "view": "flusher.panel",
+        "node": "flush"
+      }
+    },
+    {
+      "expect": {
+        "call": "harness.launch",
+        "count": 1,
+        "params": {
+          "agent": "codex"
+        },
+        "paramsContain": {
+          "folder": "/repos/app",
+          "prompt": "/repos/app (branch main, no upstream yet): 1 changed, 1 new"
+        }
+      }
+    },
+    {
+      "expect": {
+        "call": "harness.launch",
+        "paramsContain": {
+          "prompt": "Never force-push"
+        }
+      }
+    },
+    {
+      "expect": {
+        "call": "harness.launch",
+        "paramsContain": {
+          "prompt": "Also: Use conventional commits."
+        }
+      }
+    },
+    {
+      "expect": {
+        "view": "flusher.panel",
+        "node": "status",
+        "props": {
+          "visible": true
+        },
+        "propsContain": {
+          "text": "Started Codex in a new card for app."
+        }
+      }
+    }
+  ]
+}

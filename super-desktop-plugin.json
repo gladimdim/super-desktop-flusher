@@ -1,0 +1,119 @@
+{
+  "$schema": "https://raw.githubusercontent.com/gladimdim/super-desktop/master/skills/super-desktop-plugin/schemas/manifest.schema.json",
+  "manifestVersion": 1,
+  "id": "flusher",
+  "name": "Flusher",
+  "version": "0.1.0",
+  "description": "Lists the git repositories in your folders that have uncommitted changes; Flush starts an agent that commits them meaningfully and pushes each current branch.",
+  "author": "gladimdim",
+  "license": "MIT",
+  "repository": "https://github.com/gladimdim/super-desktop-flusher",
+  "engines": {
+    "superDesktop": ">=1.2.0",
+    "pluginApi": "1"
+  },
+  "main": {
+    "command": [
+      "python3",
+      "main.py"
+    ]
+  },
+  "activation": [
+    "onOverlayShown",
+    "onCommand:flusher.open"
+  ],
+  "permissions": [
+    "ui.toolbar",
+    "ui.popup",
+    "shortcuts.global",
+    "harness.launch"
+  ],
+  "sandbox": {
+    "network": false,
+    "read": [
+      "${settings.folders}",
+      "~/.gitconfig",
+      "~/.config/git"
+    ]
+  },
+  "contributes": {
+    "commands": [
+      {
+        "id": "flusher.open",
+        "title": "Show projects with uncommitted changes",
+        "icon": "🧹"
+      }
+    ],
+    "shortcuts": [
+      {
+        "id": "flusher.open-key",
+        "command": "flusher.open",
+        "default": "SUPER + CTRL + G",
+        "scope": "global"
+      }
+    ],
+    "toolbar": [
+      {
+        "id": "flusher.button",
+        "icon": "🧹",
+        "label": "Flush",
+        "tooltip": "Projects with uncommitted changes",
+        "command": "flusher.open"
+      }
+    ],
+    "views": [
+      {
+        "id": "flusher.panel",
+        "title": "Flusher",
+        "kind": "panel",
+        "width": 760,
+        "height": 560
+      }
+    ],
+    "settings": [
+      {
+        "key": "folders",
+        "type": "paths",
+        "kind": "directory",
+        "title": "Folders to scan",
+        "description": "Git repositories in these folders and their sub-folders are listed.",
+        "default": []
+      },
+      {
+        "key": "agent",
+        "type": "enum",
+        "title": "Agent that flushes",
+        "description": "Started in a new card to commit and push the projects you tick.",
+        "values": [
+          "claude",
+          "codex",
+          "opencode",
+          "gemini"
+        ],
+        "default": "claude"
+      },
+      {
+        "key": "depth",
+        "type": "number",
+        "title": "Sub-folder depth",
+        "description": "How many folder levels below each folder are searched for repositories.",
+        "min": 1,
+        "max": 8,
+        "default": 4
+      },
+      {
+        "key": "includeUntracked",
+        "type": "bool",
+        "title": "Count new (untracked) files as changes",
+        "default": true
+      },
+      {
+        "key": "instructions",
+        "type": "string",
+        "title": "Extra instructions for the agent",
+        "description": "Added to the agent's prompt, for example a commit message convention.",
+        "default": ""
+      }
+    ]
+  }
+}
